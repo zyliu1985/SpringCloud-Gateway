@@ -1,0 +1,68 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: gateway-service-zuul
+  profiles: default
+#  cloud:
+#    retry:
+#      enabled: true
+  http:
+    multipart:
+      max-file-size: 10Mb
+      max-request-size: 100Mb
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8000/eureka/
+  instance:
+    appname: gateway-service
+    status-page-url-path: /swagger-ui.html
+  healthcheck:
+    enabled: true
+
+zuul:
+  ribbon:
+    eager-load:
+      enabled: true
+  ribbon-isolation-strategy: thread
+  sensitive-headers: true
+  add-host-header: true
+  ignored-services: '*'
+  host:
+    max-per-route-connections: 50
+    max-total-connections: 200
+    socket-timeout-millis: 10000
+    connect-timeout-millis: 10000
+  routes:
+    serviceA:
+      path: /v1/a/**
+      serviceId: service-a
+      stripPrefix: false
+    serviceB:
+      path: /v1/b/**
+      serviceId: service-b
+      stripPrefix: false
+
+ribbon:
+  enabled:
+    eager-load: true
+    clients: serviceA
+  read-timeout: 5000
+  connect-timeout: 5000
+  socket-timeout: 5000
+  ok-to-retry-on-all-operations: true
+  max-auto-retries: 1
+  max-auto-retries-next-server: 1
+
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000
